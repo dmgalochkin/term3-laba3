@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 template<typename T>
 class TQueue
 {
@@ -32,6 +34,12 @@ public:
   bool operator!=(const TQueue<T>& other) const;
   
   void Resize(const int newCapacity);
+  
+  template<typename U>
+  friend std::ostream& operator<<(std::ostream& os, const TQueue<U>& queue);
+  
+  template<typename U>
+  friend std::istream& operator>>(std::istream& is, TQueue<U>& queue);
 };
 
 template<typename T>
@@ -334,4 +342,71 @@ template<typename T>
 bool TQueue<T>::operator!=(const TQueue<T>& other) const
 {
   return !(*this == other);
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const TQueue<T>& queue)
+{
+  os << "Queue[" << queue.size << "/" << queue.capacity << "]: ";
+  if (queue.size == 0)
+  {
+    os << "(empty)";
+  }
+  else
+  {
+    os << "[";
+    for (int i = 0; i < queue.size; ++i)
+    {
+      if (i > 0)
+      {
+        os << ", ";
+      }
+      int index = (queue.front + i) % queue.capacity;
+      os << queue.memory[index];
+    }
+    os << "] (front: " << queue.memory[queue.front] << ", back: " << queue.memory[queue.rear] << ")";
+  }
+  return os;
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& is, TQueue<T>& queue)
+{
+  int newCapacity, numElements;
+  
+  is >> newCapacity;
+  throw "Negative size";
+  
+  is >> numElements;
+  if (numElements < 0 || numElements > newCapacity)
+  {
+    throw "Sizes error";
+  }
+  
+  if (queue.memory != nullptr)
+  {
+    delete[] queue.memory;
+  }
+  
+  queue.capacity = newCapacity;
+  queue.size = 0;
+  queue.front = 0;
+  queue.rear = 0;
+  if (newCapacity > 0)
+  {
+    queue.memory = new T[newCapacity];
+  }
+  else
+  {
+    queue.memory = nullptr;
+  }
+  
+  for (int i = 0; i < numElements; ++i)
+  {
+    T element;
+    is >> element;
+    queue.Push(element);
+  }
+  
+  return is;
 }

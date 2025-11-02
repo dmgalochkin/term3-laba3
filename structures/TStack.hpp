@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 template<typename T>
 class TStack
 {
@@ -29,6 +31,12 @@ public:
   bool operator!=(const TStack<T>& other) const;
   
   void Resize(const int newCapacity);
+  
+  template<typename U>
+  friend std::ostream& operator<<(std::ostream& os, const TStack<U>& stack);
+  
+  template<typename U>
+  friend std::istream& operator>>(std::istream& is, TStack<U>& stack);
 };
 
 template<typename T>
@@ -265,4 +273,67 @@ template<typename T>
 bool TStack<T>::operator!=(const TStack<T>& other) const
 {
   return !(*this == other);
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const TStack<T>& stack)
+{
+  os << "Stack[" << stack.size << "/" << stack.capacity << "]: ";
+  if (stack.size == 0)
+  {
+    os << "(empty)";
+  }
+  else
+  {
+    os << "[";
+    for (int i = 0; i < stack.size; ++i)
+    {
+      if (i > 0) os << ", ";
+      os << stack.memory[i];
+    }
+    os << "] (top: " << stack.memory[stack.size - 1] << ")";
+  }
+  return os;
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& is, TStack<T>& stack)
+{
+  int newCapacity, numElements;
+  
+  is >> newCapacity;
+  if (newCapacity < 0)
+  {
+    throw "Negative size";
+  }
+  
+  is >> numElements;
+  if (numElements < 0 || numElements > newCapacity)
+  {
+    throw "Sizes error";
+  }
+  
+  {
+    delete[] stack.memory;
+  }
+  
+  stack.capacity = newCapacity;
+  stack.size = 0;
+  if (newCapacity > 0)
+  {
+    stack.memory = new T[newCapacity];
+  }
+  else
+  {
+    stack.memory = nullptr;
+  }
+  
+  for (int i = 0; i < numElements; ++i)
+  {
+    T element;
+    is >> element;
+    stack.memory[stack.size++] = element;
+  }
+  
+  return is;
 }
